@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Khmer Dubbing Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600;700&family=Battambang:wght@400;700&display=swap">
+<style>
+:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#0a0816;--card:rgba(255,255,255,.055);--line:rgba(255,255,255,.1);--tx:#ece9ff;--mu:#9a96b8;--pu:#8b5cf6;--cy:#22d3ee;--pk:#f472b6;--ok:#34d399;--er:#fb7185;--g:linear-gradient(120deg,#8b5cf6,#22d3ee 55%,#f472b6)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:radial-gradient(900px 500px at 10% -10%,#2a1a5e55,transparent),radial-gradient(800px 500px at 100% 0,#0e4a5e44,transparent),var(--bg);color:var(--tx);font:15px/1.6 "Noto Sans Khmer","Battambang",system-ui,sans-serif}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 90px}
+h1{margin:0;font-size:1.5rem;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}
+.bar{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:var(--card);backdrop-filter:blur(10px);padding:8px 14px;border-radius:10px;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--cy);transform:translateY(-1px)}
+.btn.p{background:var(--g);border:0;color:#0a0816;font-weight:700}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(14px)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:980px}
+th{font-weight:600;color:var(--mu);text-align:left;padding:12px 8px;font-size:.85rem;border-bottom:1px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.th{width:84px}.th img,.th span{width:76px;height:44px;border-radius:8px;object-fit:cover;display:grid;place-items:center;background:#0006}
+.nm b{display:block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nm small{color:var(--mu)}
+.pill{position:relative;display:block;width:100%;min-width:92px;height:26px;border-radius:99px;border:0;background:#ffffff14;overflow:hidden;cursor:pointer;padding:0}
+.pill i{position:absolute;inset:0 auto 0 0;background:var(--mu);opacity:.5;transition:width .3s}
+.pill b{position:relative;font-size:.75rem;font-weight:600}
+.s-running i{background:var(--cy);opacity:.8}.s-done i{background:var(--ok);opacity:.85}.s-error i{background:var(--er);opacity:.9;width:100%!important}
+.act{white-space:nowrap}.act button{border:0;background:#ffffff14;border-radius:8px;width:32px;height:32px;cursor:pointer;margin-right:4px}.act button:hover{background:var(--pu)}
+.empty{padding:56px 20px;text-align:center;color:var(--mu);border:2px dashed var(--line);border-radius:16px;cursor:pointer}
+.empty:hover,.drag .empty{border-color:var(--cy);color:var(--tx)}
+.status{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:#0a0816ee;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 22px;justify-content:center;font-size:.85rem;color:var(--mu)}
+.status b{color:var(--tx)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;padding:16px}
+label{display:block;font-size:.85rem;color:var(--mu);margin-bottom:4px}
+.f{display:flex;gap:6px}.f input,select,textarea{flex:1;width:100%;background:#0006;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.sec{padding:16px;margin-bottom:14px}.sec h2{margin:0 0 4px;font-size:1.05rem}
+.note{color:var(--mu);font-size:.85rem;margin:0 0 6px}
+#toasts{position:fixed;right:14px;top:calc(14px + env(safe-area-inset-top,0px));display:grid;gap:8px;z-index:9}
+.toast{padding:10px 14px;border-radius:12px;background:#1b1735;border:1px solid var(--line);max-width:320px;animation:in .2s}.toast.e{border-color:var(--er)}.toast.o{border-color:var(--ok)}
+@keyframes in{from{opacity:0;transform:translateX(12px)}}
+.skel{height:56px;margin:8px;border-radius:10px;background:linear-gradient(90deg,#ffffff0a,#ffffff1c,#ffffff0a);background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+[hidden]{display:none!important}
+td input,td textarea{width:100%;background:#0006;border:1px solid var(--line);border-radius:8px;padding:6px 8px}td textarea{min-width:230px;resize:vertical}.tc{min-width:116px}.f input,select,textarea{flex:1}textarea#gl{width:100%;background:#0006;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 id="ttl"></h1>
+<div class="bar">
+<button class="btn p" id="bImp"></button>
+<button class="btn" id="bSet"></button>
+<button class="btn" id="bThm"></button>
+<button class="btn p" id="bAll"></button>
+<button class="btn" id="bLang" aria-label="Language">EN / ខ្មែរ</button>
+</div>
+</header>
+<input type="file" id="file" multiple accept=".mp4,.mkv,.mov,.mp3,.wav,video/*,audio/*" hidden>
+<main id="main"><div class="glass"><div class="skel"></div><div class="skel"></div></div></main>
+<section id="set" hidden></section>
+<section id="ed" hidden></section>
+<section id="tl" hidden></section>
+</div>
+<div class="status" id="status"></div>
+<div id="toasts" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<script>
+const STAGES=['separate','transcript','gender','translate','speech','export'];
+const T={km:{app:'ស្ទូឌីយោដាក់សំឡេងខ្មែរ',imp:'នាំចូលឯកសារ',set:'ការកំណត់ / ម៉ូដែល',thm:'រូបភាពតូច',all:'ចាប់ផ្តើមទាំងអស់',back:'ត្រឡប់ក្រោយ',file:'ឯកសារ',dur:'រយៈពេល',act:'សកម្មភាព',
+separate:'បំបែកសំឡេង',transcript:'ប្រតិចារិក',gender:'ភេទសំឡេង',translate:'បកប្រែ',speech:'សំឡេងនិយាយ',export:'នាំចេញ',
+idle:'រង់ចាំ',running:'កំពុងដំណើរការ',done:'រួចរាល់',error:'បរាជ័យ',
+empty:'ទម្លាក់ឯកសារវីដេអូ ឬសំឡេងនៅទីនេះ ឬចុចដើម្បីជ្រើសរើស (mp4, mkv, mov, mp3, wav)',
+total:'ឯកសារសរុប',comp:'បានបញ្ចប់',errs:'កំហុស',cost:'ថ្លៃ API ប៉ាន់ស្មាន',
+priv:'សោ API រក្សាទុកក្នុងកម្មវិធីរុករករបស់អ្នកតែប៉ុណ្ណោះ (localStorage) ហើយផ្ញើទៅអ្នកផ្តល់សេវាដោយផ្ទាល់ប៉ុណ្ណោះ។',
+keys:'សោ API',test:'សាកល្បង',show:'បង្ហាញ',hide:'លាក់',save:'បានរក្សាទុក',defs:'លំនាំដើម',est:'ការប៉ាន់ស្មានថ្លៃ (ក្នុងមួយនាទីវីដេអូ)',
+ni:'ដំណាក់កាលនេះនឹងត្រូវបង្កើតនៅ Stage 2',bad:'ឯកសារមិនគាំទ្រ៖ ',big:'ឯកសារធំជាង 2GB៖ សូមបំបែកជាផ្នែកតូចៗ។',
+okk:'សោប្រើបាន',nok:'សោមិនត្រឹមត្រូវ ឬអស់កូតា',net:'បណ្តាញត្រូវបានរារាំង (ទំព័រនេះមិនអនុញ្ញាតការស្នើទៅគេហទំព័រផ្សេង)',
+tr:'ប្រតិចារិក',tl:'បកប្រែ',sp:'សំឡេងនិយាយ',vm:'សំឡេងប្រុស',vf:'សំឡេងស្រី',tg:'ភាសាគោលដៅ',ql:'គុណភាពនាំចេញ',
+ed:'បើកកម្មវិធីកែសម្រួល',rr:'ដំណើរការម្តងទៀត',dl:'ទាញយក',rm:'លុប',del:'លុបឯកសារនេះមែនទេ?',min:'/នាទី'},
+en:{app:'Khmer Dubbing Studio',imp:'Import files',set:'Models / Settings',thm:'Thumbnails',all:'Start all',back:'Back',file:'File',dur:'Duration',act:'Actions',
+separate:'Separate',transcript:'Transcript',gender:'Gender',translate:'Translate',speech:'Speech',export:'Export',
+idle:'Idle',running:'Running',done:'Done',error:'Error',
+empty:'Drop video or audio files here, or click to choose (mp4, mkv, mov, mp3, wav)',
+total:'Files',comp:'Completed',errs:'Errors',cost:'Est. API cost',
+priv:'API keys stay in this browser (localStorage) and are sent only to the provider you choose.',
+keys:'API keys',test:'Test',show:'Show',hide:'Hide',save:'Saved',defs:'Defaults',est:'Cost estimate (per minute of video)',
+ni:'This stage is built in Stage 2',bad:'Unsupported file: ',big:'File is over 2 GB: split it into smaller parts.',
+okk:'Key works',nok:'Key invalid or out of quota',net:'Network blocked (this hosted page cannot call other sites; test from your own Vercel deploy)',
+tr:'Transcribe',tl:'Translate',sp:'Speech',vm:'Male voice',vf:'Female voice',tg:'Target language',ql:'Export quality',
+ed:'Open editor',rr:'Rerun',dl:'Download',rm:'Delete',del:'Delete this file?',min:'/min'}};
+Object.assign(T.km,{ni:'ដំណាក់កាលនេះនឹងត្រូវបង្កើតនៅ Stage 3 (សំឡេង និងនាំចេញ)',undo:'មិនធ្វើវិញ',redo:'ធ្វើវិញ',find:'ស្វែងរក',repl:'ជំនួសដោយ',rall:'ជំនួសទាំងអស់',st:'ចាប់ផ្តើម',endt:'បញ្ចប់',orig:'អត្ថបទដើម',
+gloss:'សទ្ទានុក្រម (មួយបន្ទាត់ក្នុងមួយពាក្យ ឧ. John=ចន ឬ John ដើម្បីមិនបកប្រែ)',tone:'ស្ទីលបកប្រែ',src:'ភាសាប្រភព',auto:'រកឃើញដោយស្វ័យប្រវត្តិ',td:'សន្ទនាភាពយន្ត',tn:'ការនិទាន',tr2:'សង្ខេបភាពយន្ត',
+nosegs:'មិនទាន់មានប្រតិចារិក សូមដំណើរការ Transcript ជាមុន',badtime:'ពេលវេលាមិនត្រឹមត្រូវ (ទ្រង់ទ្រាយ 00:00:00,000)',badkey:'សោ API មិនត្រឹមត្រូវ សូមពិនិត្យនៅក្នុងការកំណត់',
+daily:'ដល់ដែនកំណត់ប្រចាំថ្ងៃនៃកូតាឥតគិតថ្លៃហើយ សូមព្យាយាមម្តងទៀតនៅពេលកូតាកំណត់ឡើងវិញ (ជាធម្មតាថ្ងៃស្អែក)',rate:'ជាប់ដែនកំណត់អត្រា',net2:'បណ្តាញមានបញ្ហា បានព្យាយាមច្រើនដងហើយ',big25:'ផ្នែកសំឡេងធំពេក',
+ffmissing:'ផ្ទុក ffmpeg មិនបាន (ពិនិត្យអ៊ីនធឺណិត)',nofile:'រកមិនឃើញឯកសារ សូមនាំចូលម្តងទៀត',oom:'អង្គចងចាំមិនគ្រប់គ្រាន់ សូមបំបែកឯកសារជាផ្នែកតូចៗ',loadff:'កំពុងផ្ទុក ffmpeg',noaudio:'ឯកសារគ្មានសំឡេង',
+nogroq:'សូមបញ្ចូលសោ Groq ក្នុងការកំណត់',nogem:'សូមបញ្ចូលសោ Gemini ក្នុងការកំណត់',needsep:'សូមដំណើរការ បំបែកសំឡេង ជាមុន',needtr:'សូមដំណើរការ ប្រតិចារិក ជាមុន',badjson:'Gemini ឆ្លើយមិនត្រឹមត្រូវ សូមព្យាយាមម្តងទៀត',
+quota:'កូតាឥតគិតថ្លៃ',dl:'ទាញយក',dlim:'ដែនកំណត់ Gemini ក្នុងមួយថ្ងៃ (កែបាន)',qnote:'ដែនកំណត់ពិតអាស្រ័យលើគណនី Google/Groq របស់អ្នក ហើយអាចប្រែប្រួល។ ការប្រើ Gemini ត្រូវបានរាប់ក្នុងកម្មវិធីនេះប៉ុណ្ណោះ។',voice:'សំឡេង (Edge TTS, Stage 3)',left:'ការស្នើនៅសល់'});
+Object.assign(T.en,{ni:'This stage is built in Stage 3 (voice & export)',undo:'Undo',redo:'Redo',find:'Find',repl:'Replace with',rall:'Replace all',st:'Start',endt:'End',orig:'Original',
+gloss:'Glossary (one per line, e.g. John=ចន, or John to keep as is)',tone:'Translation tone',src:'Source language',auto:'Auto-detect',td:'Movie dialogue',tn:'Narration',tr2:'Movie recap',
+nosegs:'No transcript yet: run Transcript first',badtime:'Invalid time (format 00:00:00,000)',badkey:'API key invalid: check Settings',
+daily:'Daily free limit reached. Try again when the quota resets (usually tomorrow).',rate:'Rate limited',net2:'Network problem after several retries',big25:'Audio chunk too large',
+ffmissing:'Could not load ffmpeg (check your connection)',nofile:'File not found: import it again',oom:'Not enough memory: split the file into smaller parts',loadff:'Loading ffmpeg',noaudio:'File has no audio',
+nogroq:'Add your Groq key in Settings',nogem:'Add your Gemini key in Settings',needsep:'Run Separate first',needtr:'Run Transcript first',badjson:'Gemini returned an invalid answer: retry',
+quota:'Free quota',dl:'Download',dlim:'Gemini daily limit (editable)',qnote:'Real limits depend on your Google/Groq account and can change. Gemini usage is counted by this app only.',voice:'Voice (Edge TTS, Stage 3)',left:'requests left'});
+const ls={get:(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let lang=ls.get('kds_lang','km'),view='main',projects=[],mem=new Map(),dbp=null;
+const t=k=>T[lang][k]||k,$=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m,c=''){const d=document.createElement('div');d.className='toast '+c;d.textContent=m;$('#toasts').append(d);setTimeout(()=>d.remove(),c==='e'?12000:4200)}
+/* ---------- IndexedDB (falls back to memory) ---------- */
+function openDB(){return new Promise((res,rej)=>{try{const r=indexedDB.open('kds',1);r.onupgradeneeded=()=>{r.result.createObjectStore('projects',{keyPath:'id'});r.result.createObjectStore('blobs')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})}
+async function db(store,mode,fn){try{dbp=dbp||openDB();const d=await dbp;return await new Promise((res,rej)=>{const x=d.transaction(store,mode),q=fn(x.objectStore(store));x.oncomplete=()=>res(q&&q.result);x.onerror=()=>rej(x.error)})}catch(e){return undefined}}
+const saveP=p=>projects.includes(p)?db('projects','readwrite',s=>s.put(p)):undefined;
+/* ---------- Pipeline interface (Stage 2 fills impl) ---------- */
+const Pipeline={impl:{},async run(p,stage,ctx){const f=this.impl[stage];if(!f)throw new Error('NI');await f(p,ctx)}};
+const queue={n:0,max:2,q:[],add(fn){return new Promise(r=>{this.q.push(async()=>{try{r(await fn())}catch(e){r(e)}});this.pump()})},pump(){while(this.n<this.max&&this.q.length){this.n++;this.q.shift()().finally(()=>{this.n--;this.pump()})}}};
+async function runStage(p,stage){
+ const set=(s,v,n,m)=>{if(!projects.includes(p))return;p.stages[stage]={s,p:v,note:n,msg:m};saveP(p);render()};
+ return queue.add(async()=>{try{set('running',0);await Pipeline.run(p,stage,{progress:(v,n)=>set('running',v,n)});set('done',100);return true}
+ catch(e){if(e.message==='NI'){set('idle',0);return 'NI'}console.error('[KDS]',stage,e);set('error',0,undefined,e.message);toast(e.message,'e');return false}})}
+async function startAll(){let ni=false;for(const p of projects){for(const s of STAGES){if(p.stages[s].s==='done')continue;const r=await runStage(p,s);if(r==='NI'){ni=true;continue}if(r===false)break}}if(ni||!projects.length)toast(projects.length?t('ni'):t('empty'))}
+/* ---------- Import ---------- */
+const OK=/\.(mp4|mkv|mov|mp3|wav)$/i;
+function meta(file){return new Promise(res=>{const v=/^video|\.(mp4|mkv|mov)$/i.test(file.type||file.name),el=document.createElement(v?'video':'audio'),u=URL.createObjectURL(file);let done=false;
+ const fin=(d,th)=>{if(done)return;done=true;URL.revokeObjectURL(u);res({duration:d,thumb:th})};
+ el.preload='metadata';el.muted=true;el.src=u;setTimeout(()=>fin(el.duration||0,''),9000);el.onerror=()=>fin(0,'');
+ el.onloadedmetadata=()=>{if(!v)return fin(el.duration,'');el.currentTime=Math.min(1,el.duration/2||0)};
+ el.onseeked=()=>{try{const c=document.createElement('canvas');c.width=152;c.height=88;c.getContext('2d').drawImage(el,0,0,152,88);fin(el.duration,c.toDataURL('image/jpeg',.7))}catch(e){fin(el.duration,'')}}})}
+async function importFiles(list){for(const f of list){if(!OK.test(f.name)){toast(t('bad')+f.name,'e');continue}
+ if(f.size>2*1024**3)toast(t('big'));
+ const m=await meta(f),p={id:crypto.randomUUID(),name:f.name,size:f.size,type:f.type,added:Date.now(),duration:m.duration||0,thumb:m.thumb,stages:Object.fromEntries(STAGES.map(s=>[s,{s:'idle',p:0}]))};
+ mem.set(p.id,f);projects.push(p);if(await db('blobs','readwrite',s=>s.put(f,p.id))===undefined)toast(t('nopersist'),'e');await saveP(p);render()}}
+async function regenThumbs(){for(const p of projects){const f=mem.get(p.id);if(f&&/video|mp4|mkv|mov/i.test(f.type+p.name)){p.thumb=(await meta(f)).thumb;saveP(p)}}render();toast('✓','o')}
+/* ---------- Render ---------- */
+const fmtD=s=>{s=Math.round(s||0);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,z=n=>String(n).padStart(2,'0');return(h?h+':':'')+z(m)+':'+z(x)};
+const fmtS=b=>b>1e9?(b/1e9).toFixed(2)+' GB':(b/1e6).toFixed(1)+' MB';
+const SET0={src:'auto',tone:'dialogue',gm:'gemini-2.5-flash',dlim:250,gloss:'',vm:'km-KH-PisethNeural',vf:'km-KH-SreymomNeural',vd:'km-KH-SreymomNeural',rt:0,pt:0,tts:'/api/tts',xm:'video',xd:60,xf:'Noto Sans Khmer',xs:5,xc:'#ffffff',xp:'bottom'};
+let cfg={...SET0,...ls.get('kds_set',{})};
+function render(){
+ $('#ttl').textContent=t('app');$('#bImp').textContent=t('imp');$('#bSet').textContent=view==='main'?t('set'):t('back');$('#bThm').textContent=t('thm');$('#bAll').textContent=t('all');document.documentElement.lang=lang;document.title=t('app');
+ $('#bThm').hidden=$('#bAll').hidden=$('#bImp').hidden=view!=='main';$('#main').hidden=view!=='main';$('#set').hidden=view!=='set';$('#ed').hidden=view!=='edit';$('#tl').hidden=view!=='tl';
+ const rows=projects.map(p=>`<tr data-id="${p.id}"><td class="th">${p.thumb?`<img src="${p.thumb}" alt="">`:'<span>♪</span>'}</td><td class="nm"><b title="${esc(p.name)}">${esc(p.name)}</b><small>${fmtS(p.size)}</small>${(()=>{const e=STAGES.map(q=>p.stages[q]).find(q=>q.s==='error'&&q.msg);return e?`<small style="color:var(--er);white-space:normal;display:block;max-width:260px">${esc(e.msg)}</small>`:''})()}</td><td>${fmtD(p.duration)}</td>`+
+ STAGES.map(s=>{const x=p.stages[s];return`<td><button class="pill s-${x.s}" data-stage="${s}" title="${t(s)}: ${t(x.s)}${x.msg?' - '+esc(x.msg):''}" aria-label="${t(s)} ${t(x.s)} ${x.p}%"><i style="width:${x.p}%"></i><b>${x.note||x.p+'%'} ${t(x.s)}</b></button></td>`}).join('')+
+ `<td class="act"><button data-a="edit" title="${t('ed')}" aria-label="${t('ed')}">✎</button><button data-a="rerun" title="${t('rr')}" aria-label="${t('rr')}">↻</button>${p.out?`<button data-a="dlo" title="${t('dlo')} ${fmtS(p.out.size)}" aria-label="${t('dlo')}">🎬</button>`:''}<button data-a="dl" title="${t('dl')}" aria-label="${t('dl')}">⬇</button><button data-a="rm" title="${t('rm')}" aria-label="${t('rm')}">✕</button></td></tr>`).join('');
+ $('#main').innerHTML=projects.length?`<div class="glass tw"><table><thead><tr><th></th><th>${t('file')}</th><th>${t('dur')}</th>${STAGES.map(s=>`<th>${t(s)}</th>`).join('')}<th>${t('act')}</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="empty" id="dz" tabindex="0" role="button">${t('empty')}</div>`;
+ const mins=projects.reduce((a,p)=>a+p.duration,0)/60,done=projects.filter(p=>STAGES.every(s=>p.stages[s].s==='done')).length,er=projects.filter(p=>STAGES.some(s=>p.stages[s].s==='error')).length;
+ $('#status').innerHTML=`<span>${t('total')}: <b>${projects.length}</b></span><span>${t('comp')}: <b>${done}</b></span><span>${t('errs')}: <b>${er}</b></span><span>Groq ${t('left')}: <b>${groqQ&&groqQ.rem!=null?groqQ.rem:'—'}</b></span><span>Gemini: <b>${gemUsed()}/${cfg.dlim}</b></span>`}
+const TONES={dialogue:"Tone: natural movie dialogue, matching each speaker's mood.",narration:'Tone: calm, clear narration.',recap:'Tone: energetic movie-recap storytelling.'};
+function renderSet(){const k=ls.get('kds_keys',{}),o=(id,a)=>`<select data-c="${id}">${a.map(([v,l])=>`<option value="${v}"${cfg[id]===v?' selected':''}>${l}</option>`).join('')}</select>`;
+ $('#set').innerHTML=`<div class="glass sec"><h2>${t('keys')}</h2><p class="note">🔒 ${t('priv')}</p><div class="grid" style="padding:0">${[['groq','Groq Whisper (console.groq.com)'],['gemini','Google Gemini (aistudio.google.com)']].map(([id,n])=>`<div><label for="k-${id}">${n}</label><div class="f"><input id="k-${id}" data-k="${id}" type="password" autocomplete="off" spellcheck="false" value="${esc(k[id]||'')}"><button class="btn" data-sh="${id}">${t('show')}</button><button class="btn" data-ts="${id}">${t('test')}</button></div></div>`).join('')}</div></div>
+ <div class="glass sec"><h2>${t('defs')}</h2><div class="grid" style="padding:0">
+ <div><label>${t('src')}</label>${o('src',[['auto',t('auto')],['en','English'],['zh','中文'],['ko','한국어'],['ja','日本語'],['th','ไทย'],['vi','Tiếng Việt'],['hi','हिन्दी'],['fr','Français'],['es','Español']])}</div>
+ <div><label>${t('tone')}</label>${o('tone',[['dialogue',t('td')],['narration',t('tn')],['recap',t('tr2')]])}</div>
+ <div><label>Gemini model</label>${o('gm',[['gemini-2.5-flash','gemini-2.5-flash'],['gemini-2.5-flash-lite','gemini-2.5-flash-lite']])}</div>
+ <div><label for="dl">${t('dlim')}</label><input id="dl" data-c="dlim" type="number" min="1" value="${cfg.dlim}" style="width:100%;background:#0006;border:1px solid var(--line);border-radius:10px;padding:8px 10px"></div>
+ <div><label>${t('vd')}</label>${o('vd',[['km-KH-SreymomNeural','Sreymom ♀'],['km-KH-PisethNeural','Piseth ♂']])}</div>
+ <div><label for="rt">${t('spd')}: ${cfg.rt}%</label><input id="rt" data-c="rt" type="range" min="-30" max="30" value="${cfg.rt}" style="width:100%"></div>
+ <div><label for="pt">${t('pit')}: ${cfg.pt}Hz</label><input id="pt" data-c="pt" type="range" min="-30" max="30" value="${cfg.pt}" style="width:100%"></div>
+ <div><label for="tu">TTS endpoint</label><input id="tu" data-c="tts" value="${esc(cfg.tts)}" style="width:100%;background:#0006;border:1px solid var(--line);border-radius:10px;padding:8px 10px"></div></div>
+ <label for="gl" style="margin-top:12px">${t('gloss')}</label><textarea id="gl" data-c="gloss" rows="4">${esc(cfg.gloss)}</textarea></div>
+ <div class="glass sec"><h2>${t('ex')}</h2><div class="grid" style="padding:0">
+ <div><label>${t('ex')}</label>${o('xm',[['video',t('xmv')],['burn',t('xmb')],['mp3',t('xmm')]])}</div>
+ <div><label for="xd">${t('xd')}: ${cfg.xd}%</label><input id="xd" data-c="xd" type="range" min="0" max="100" value="${cfg.xd}" style="width:100%"></div>
+ <div><label>${t('xf')}</label>${o('xf',[['Noto Sans Khmer','Noto Sans Khmer'],['Battambang','Battambang']])}</div>
+ <div><label for="xs">${t('xs')}: ${cfg.xs}</label><input id="xs" data-c="xs" type="range" min="3" max="9" step="0.5" value="${cfg.xs}" style="width:100%"></div>
+ <div><label for="xc">${t('xc')}</label><input id="xc" data-c="xc" type="color" value="${cfg.xc}"></div>
+ <div><label>${t('xp')}</label>${o('xp',[['bottom',t('pb')],['mid',t('pm')],['top',t('ptp')]])}</div></div></div>
+ <div class="glass sec"><h2>${t('quota')}</h2><p class="note">Groq: <b>${groqQ&&groqQ.rem!=null?groqQ.rem+'/'+groqQ.lim:'—'}</b> ${t('left')} · Gemini: <b>${gemUsed()}/${cfg.dlim}</b></p><p class="note">${t('qnote')}</p></div>`}
+const TESTS={groq:k=>['https://api.groq.com/openai/v1/models',{headers:{Authorization:'Bearer '+k}}],gemini:k=>['https://generativelanguage.googleapis.com/v1beta/models',{headers:{'x-goog-api-key':k}}]};
+async function testKey(id){const k=ls.get('kds_keys',{});if(!k[id])return toast(t('nok'),'e');
+ try{const[u,o]=TESTS[id](k[id]);const r=await fetch(u,o);if(id==='groq'&&r.ok)groqQ=groqQ||{rem:null,lim:null};toast(r.ok?t('okk'):t('nok')+` (${r.status})`,r.ok?'o':'e')}catch(e){toast(t('net'),'e')}}
+/* ---------- Events ---------- */
+$('#bImp').onclick=()=>$('#file').click();$('#file').onchange=e=>{importFiles([...e.target.files]);e.target.value=''};
+$('#bSet').onclick=()=>{view=view==='main'?'set':'main';render();if(view==='set')renderSet()};$('#bThm').onclick=regenThumbs;$('#bAll').onclick=startAll;
+$('#bLang').onclick=()=>{lang=lang==='km'?'en':'km';ls.set('kds_lang',lang);render();if(view==='set')renderSet();if(view==='edit')renderEd()};
+document.addEventListener('dragover',e=>{e.preventDefault();document.body.classList.add('drag')});
+document.addEventListener('dragleave',e=>{if(!e.relatedTarget)document.body.classList.remove('drag')});
+document.addEventListener('drop',e=>{e.preventDefault();document.body.classList.remove('drag');if(view==='main')importFiles([...e.dataTransfer.files])});
+$('#main').addEventListener('click',async e=>{if(e.target.closest('#dz'))return $('#file').click();
+ const tr=e.target.closest('tr[data-id]');if(!tr)return;const p=projects.find(x=>x.id===tr.dataset.id),pill=e.target.closest('[data-stage]'),a=e.target.closest('[data-a]');
+ if(pill){const st=pill.dataset.stage;if(p.stages[st].s==='done'){if(st==='transcript')p.cdone={};if(st==='translate')(p.segs||[]).forEach(x=>x.k='');if(st==='speech')(p.segs||[]).forEach(x=>x.a='')}if(await runStage(p,st)==='NI')toast(t('ni'))}
+ else if(a){const w=a.dataset.a;
+  if(w==='edit')openEd(p.id);
+  if(w==='rerun'){p.stages=Object.fromEntries(STAGES.map(s=>[s,{s:'idle',p:0}]));if(await runStage(p,STAGES[0])==='NI')toast(t('ni'))}
+  if(w==='dlo'){const b=mem.get(p.id+':out')||await db('blobs','readonly',s=>s.get(p.id+':out'));if(!b)return toast(t('nofile'),'e');dlB(b,p.out.name);return}
+  if(w==='dl'){let f=mem.get(p.id)||await db('blobs','readonly',s=>s.get(p.id));if(!f)return toast(t('nok'),'e');const u=URL.createObjectURL(f),l=document.createElement('a');l.href=u;l.download=p.name;l.click();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+  if(w==='rm'&&confirm(t('del'))){projects=projects.filter(x=>x!==p);mem.delete(p.id);db('projects','readwrite',s=>s.delete(p.id));db('blobs','readwrite',s=>s.delete(IDBKeyRange.bound(p.id,p.id+':\uffff')));render()}}});
+$('#main').addEventListener('keydown',e=>{if(e.target.id==='dz'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();$('#file').click()}});
+$('#set').addEventListener('input',e=>{const k=e.target.dataset.k;if(k){const o=ls.get('kds_keys',{});o[k]=e.target.value.trim();ls.set('kds_keys',o)}});
+$('#set').addEventListener('change',e=>{const c=e.target.dataset.c;if(c){cfg[c]=/^(dlim|rt|pt|xd|xs)$/.test(c)?(+e.target.value||(c==='dlim'?250:0)):e.target.value;ls.set('kds_set',cfg);renderSet();toast(t('save'),'o')}});
+$('#set').addEventListener('click',e=>{const s=e.target.closest('[data-sh]'),x=e.target.closest('[data-ts]');
+ if(s){const i=$('#k-'+s.dataset.sh),h=i.type==='password';i.type=h?'text':'password';s.textContent=h?t('hide'):t('show')}
+ if(x)testKey(x.dataset.ts)});
+/* ---------- Stage 2: ffmpeg, Groq, Gemini ---------- */
+const wait=ms=>new Promise(r=>setTimeout(r,ms)),keys=()=>ls.get('kds_keys',{}),today=()=>new Date().toISOString().slice(0,10);
+const gemUsed=()=>{const g=ls.get('kds_gem',{});return g.d===today()?g.n:0},gemInc=()=>ls.set('kds_gem',{d:today(),n:gemUsed()+1});
+let groqQ=null,ff=null;
+async function api(url,opt,{tag,note,tries=5}={}){
+ for(let i=0;;i++){let r;
+  try{r=await fetch(url,opt)}catch(e){if(i>=tries)throw new Error(t('net2'));if(note)note('↻'+(i+1));await wait(Math.min(2**i,30)*1000);continue}
+  if(tag==='groq'){groqQ={rem:r.headers.get('x-ratelimit-remaining-requests'),lim:r.headers.get('x-ratelimit-limit-requests')};render()}
+  if(r.ok)return r.json();
+  const txt=await r.text();let j={};try{j=JSON.parse(txt)}catch(e){}const msg=(j.error&&j.error.message)||txt.slice(0,160);
+  if(r.status===401||r.status===403||(r.status===400&&/API key/i.test(msg)))throw new Error(t('badkey'));
+  if(r.status===413)throw new Error(t('big25'));
+  if(r.status===429){if(/PerDay|per day|\(RPD\)|\(ASD\)/i.test(txt))throw new Error(t('daily'));
+   const ra=+r.headers.get('retry-after')||Math.min(2**i*5,60);if(i>=tries||ra>120)throw new Error(t('rate')+' ('+Math.round(ra)+'s)');
+   for(let n=Math.ceil(ra);n>0;n--){if(note)note('⏳'+n+'s');await wait(1000)}continue}
+  if(r.status>=500&&i<tries){await wait(2**i*1500);continue}
+  throw new Error(msg||'HTTP '+r.status)}}
+async function getFF(){if(ff)return ff;if(!window.FFmpeg)throw new Error(t('ffmissing')+' — '+t('ffhint'));const x=FFmpeg.createFFmpeg({log:false,corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'});try{await x.load()}catch(e){console.error('[KDS] ffmpeg load failed',e);throw new Error(t('ffmissing')+': '+((e&&e.message)||e)+' — '+t('ffhint'))}return ff=x}
+Pipeline.impl.separate=async(p,c)=>{
+ const file=mem.get(p.id)||await db('blobs','readonly',s=>s.get(p.id));if(!file)throw new Error(t('nofile'));
+ if(file.size>1.5*1024**3)throw new Error(t('oom'));
+ c.progress(0,t('loadff'));const f=await getFF();
+ try{f.FS('writeFile','in',await FFmpeg.fetchFile(file));f.setProgress(({ratio})=>c.progress(Math.max(0,Math.min(99,Math.round(ratio*100)))));
+  await f.run('-i','in','-vn','-ac','1','-ar','16000','-c:a','libmp3lame','-b:a','32k','-f','segment','-segment_time','600','-reset_timestamps','1','c%03d.mp3');
+  const names=f.FS('readdir','/').filter(n=>/^c\d+\.mp3$/.test(n)).sort();if(!names.length)throw new Error(t('noaudio'));
+  for(let i=0;i<names.length;i++){await db('blobs','readwrite',s=>s.put(new Blob([f.FS('readFile',names[i])],{type:'audio/mpeg'}),p.id+':c'+i));f.FS('unlink',names[i])}
+  p.chunks=names.length;p.cdone={};p.segs=[];saveP(p)}
+ catch(e){ff=null;throw new Error(/memory|abort|OOM|alloc/i.test(e.message)?t('oom'):e.message)}
+ finally{try{f.FS('unlink','in')}catch(e){}}};
+Pipeline.impl.transcript=async(p,c)=>{
+ const k=keys().groq;if(!k)throw new Error(t('nogroq'));if(!p.chunks)throw new Error(t('needsep'));
+ p.cdone=p.cdone||{};const n=p.chunks;
+ for(let i=0;i<n;i++){if(p.cdone[i])continue;
+  const b=await db('blobs','readonly',s=>s.get(p.id+':c'+i));if(!b)throw new Error(t('needsep'));
+  const fd=new FormData();fd.append('file',b,'c.mp3');fd.append('model','whisper-large-v3-turbo');fd.append('response_format','verbose_json');if(cfg.src!=='auto')fd.append('language',cfg.src);
+  c.progress(Math.round(i/n*100),`${i+1}/${n}`);
+  const j=await api('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+k},body:fd},{tag:'groq',note:m=>c.progress(Math.round(i/n*100),`${i+1}/${n} ${m}`)});
+  p.cdone[i]=(j.segments||[]).filter(x=>x.text.trim()).map(x=>({s:+(x.start+i*600).toFixed(2),e:+(x.end+i*600).toFixed(2),o:x.text.trim(),k:''}));
+  if(j.language)p.srcLang=j.language;saveP(p);c.progress(Math.round((i+1)/n*100),`${i+1}/${n}`)}
+ p.segs=Array.from({length:n},(_,i)=>p.cdone[i]).flat();saveP(p)};
+Pipeline.impl.translate=async(p,c)=>{
+ const k=keys().gemini;if(!k)throw new Error(t('nogem'));if(!p.segs||!p.segs.length)throw new Error(t('needtr'));
+ const B=40,n=Math.ceil(p.segs.length/B);
+ for(let i=0;i<n;i++){const batch=p.segs.slice(i*B,i*B+B);if(batch.every(x=>x.k))continue;
+  const ctx=p.segs.slice(Math.max(0,i*B-3),i*B).map(x=>x.o+' => '+x.k).join('\n');
+  const prompt=`Translate these subtitle lines${p.srcLang?' (source language: '+p.srcLang+')':''} into natural spoken Khmer. ${TONES[cfg.tone]} Keep each line short enough to be spoken in its original time slot, keep character names consistent, never translate literally. Glossary (keep these terms exactly as written, or use the given Khmer):\n${cfg.gloss.trim()||'(none)'}\nPrevious lines for context:\n${ctx||'(none)'}\nReturn ONLY a JSON array of ${batch.length} strings, same order and count.\nLines:\n${JSON.stringify(batch.map(x=>x.o))}`;
+  let out=null;
+  for(let a=0;a<3&&!out;a++){if(gemUsed()>=cfg.dlim)throw new Error(t('daily'));
+   const j=await api(`https://generativelanguage.googleapis.com/v1beta/models/${cfg.gm}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseMimeType:'application/json',temperature:.3}})},{tag:'gem',note:m=>c.progress(Math.round(i/n*100),`${i+1}/${n} ${m}`)});
+   gemInc();try{out=JSON.parse(j.candidates[0].content.parts[0].text)}catch(e){out=null}if(!Array.isArray(out)||out.length!==batch.length)out=null}
+  if(!out)throw new Error(t('badjson'));
+  batch.forEach((x,j)=>x.k=String(out[j]));saveP(p);c.progress(Math.round((i+1)/n*100),`${i+1}/${n}`)}};
+/* ---------- Subtitle editor ---------- */
+let ed=null;
+const tc=(s,v)=>{const T=Math.round(Math.max(0,s)*1000),z=(n,l=2)=>String(n).padStart(l,'0');return`${z(Math.floor(T/36e5))}:${z(Math.floor(T%36e5/6e4))}:${z(Math.floor(T%6e4/1e3))}${v?'.':','}${z(T%1000,3)}`};
+const pt=s=>{const m=/^(\d+):(\d+):(\d+)[.,](\d+)$/.exec(s.trim());return m?+m[1]*3600+ +m[2]*60+ +m[3]+ +('0.'+m[4]):null};
+function openEd(id){const p=projects.find(x=>x.id===id);if(!p||!p.segs||!p.segs.length)return toast(t('nosegs'),'e');ed={p,u:[],r:[],last:JSON.stringify(p.segs)};view='edit';render();renderEd()}
+function commit(){ed.u.push(ed.last);if(ed.u.length>100)ed.u.shift();ed.r=[];ed.last=JSON.stringify(ed.p.segs);saveP(ed.p)}
+function undo(u){const a=u?ed.u:ed.r,b=u?ed.r:ed.u;if(!a.length)return;b.push(ed.last);ed.last=a.pop();ed.p.segs=JSON.parse(ed.last);saveP(ed.p);renderEd()}
+const inp='style="width:140px;background:#0006;border:1px solid var(--line);border-radius:10px;padding:8px"';
+function renderEd(){ed.p.segs.forEach(fit);$('#ed').innerHTML=`<div class="bar" style="margin-bottom:10px"><button class="btn" data-e="undo">↶ ${t('undo')}</button><button class="btn" data-e="redo">↷ ${t('redo')}</button><input id="fi" placeholder="${t('find')}" ${inp}><input id="ri" placeholder="${t('repl')}" ${inp}><button class="btn" data-e="rall">${t('rall')}</button><button class="btn" data-e="gen">🔊 ${t('gen')}</button><button class="btn" data-e="tl">${t('tlv')}</button><button class="btn p" data-e="srt">.srt</button><button class="btn p" data-e="vtt">.vtt</button></div>
+<div class="glass tw"><table><thead><tr><th>#</th><th>${t('st')}</th><th>${t('endt')}</th><th>${t('orig')}</th><th>Khmer</th><th>${t('vc')}</th><th></th></tr></thead><tbody>${ed.p.segs.map((x,i)=>`<tr data-i="${i}"${x.over?' style="background:#fb718522"':''}><td>${i+1}</td><td><input class="tc" data-f="s" value="${tc(x.s)}" aria-label="${t('st')}"></td><td><input class="tc" data-f="e" value="${tc(x.e)}" aria-label="${t('endt')}"></td><td><textarea data-f="o" rows="2">${esc(x.o)}</textarea></td><td><textarea data-f="k" rows="2" lang="km">${esc(x.k)}</textarea></td><td><select data-f="v" aria-label="${t('vc')}"><option value="km-KH-SreymomNeural"${(x.v||cfg.vd)==='km-KH-SreymomNeural'?' selected':''}>♀ Sreymom</option><option value="km-KH-PisethNeural"${(x.v||cfg.vd)==='km-KH-PisethNeural'?' selected':''}>♂ Piseth</option></select><small>${x.d?x.d+'s'+(x.f>1?' ×'+x.f:'')+(x.over?' ⚠':''):''}</small></td><td class="act"><button data-e="pv" title="${t('pv')}" aria-label="${t('pv')}">▶</button><button data-e="nm" title="-0.1s" aria-label="-0.1s">◂</button><button data-e="np" title="+0.1s" aria-label="+0.1s">▸</button><button data-e="mg" title="Merge" aria-label="Merge">⊕</button><button data-e="sp" title="Split" aria-label="Split">✂</button></td></tr>`).join('')}</tbody></table></div>`}
+function expo(v){const vt=v==='vtt',body=ed.p.segs.map((x,i)=>`${vt?'':i+1+'\n'}${tc(x.s,vt)} --> ${tc(x.e,vt)}\n${x.k||x.o}\n`).join('\n'),a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob(['\ufeff'+(vt?'WEBVTT\n\n':'')+body],{type:'text/plain;charset=utf-8'}));a.download=ed.p.name.replace(/\.[^.]+$/,'')+'.km.'+v;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+const half=a=>{const w=a.split(' ');if(w.length>1){const c=Math.ceil(w.length/2);return[w.slice(0,c).join(' '),w.slice(c).join(' ')]}
+ const g=typeof Intl!=='undefined'&&Intl.Segmenter?[...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(a)].map(x=>x.segment):[...a],m=Math.floor(g.length/2);return[g.slice(0,m).join(''),g.slice(m).join('')]};
+$('#ed').addEventListener('change',e=>{const f=e.target.dataset.f,tr=e.target.closest('tr');if(!f||!tr)return;const x=ed.p.segs[+tr.dataset.i];
+ if(f==='s'||f==='e'){const v=pt(e.target.value);if(v==null||(f==='s'?v>=x.e:v<=x.s)){e.target.value=tc(x[f]);return toast(t('badtime'),'e')}x[f]=v}else x[f]=e.target.value;commit();if(f!=='o'&&f!=='k')renderEd()});
+$('#ed').addEventListener('click',e=>{const b=e.target.closest('[data-e]');if(!b)return;const w=b.dataset.e,tr=b.closest('tr'),i=tr?+tr.dataset.i:-1,S=ed.p.segs;
+ if(w==='pv')return preview(S[i]).then(()=>renderEd());if(w==='gen')return genVoices();if(w==='tl')return openTl();if(w==='undo')return undo(1);if(w==='redo')return undo(0);if(w==='srt'||w==='vtt')return expo(w);
+ if(w==='rall'){const q=$('#fi').value;if(!q)return;let n=0;S.forEach(x=>{if(x.k.includes(q)){x.k=x.k.split(q).join($('#ri').value);n++}});if(n)commit();renderEd();return toast(String(n),'o')}
+ if(w==='nm'||w==='np'){const d=w==='np'?.1:-.1;if(S[i].s+d<0)return;S[i].s=+(S[i].s+d).toFixed(2);S[i].e=+(S[i].e+d).toFixed(2)}
+ if(w==='mg'){if(!S[i+1])return;S[i].e=S[i+1].e;S[i].o+=' '+S[i+1].o;S[i].k=(S[i].k+' '+S[i+1].k).trim();S.splice(i+1,1)}
+ if(w==='sp'){const x=S[i],m=+((x.s+x.e)/2).toFixed(2),[o1,o2]=half(x.o),[k1,k2]=half(x.k);S.splice(i,1,{s:x.s,e:m,o:o1,k:k1},{s:m,e:x.e,o:o2,k:k2})}
+ commit();renderEd()});
+document.addEventListener('keydown',e=>{if(view!=='edit')return;const fld=/TEXTAREA|INPUT/.test(e.target.tagName),k=e.key.toLowerCase();
+ if(e.altKey&&k==='z'){e.preventDefault();undo(1)}else if(e.altKey&&k==='y'){e.preventDefault();undo(0)}
+ else if(!fld&&(e.ctrlKey||e.metaKey)&&(k==='z'||k==='y')){e.preventDefault();undo(k==='z'&&!e.shiftKey)}});
+/* ---------- Stage 3: Edge TTS via /api/tts, time-fit, timeline ---------- */
+Object.assign(T.km,{gen:'បង្កើតសំឡេង',tlv:'ទិដ្ឋភាពពេលវេលា',edit:'កែសម្រួល',vc:'សំឡេង',pv:'ស្តាប់',vd:'សំឡេងលំនាំដើម',spd:'ល្បឿន',pit:'កម្រិតសំឡេង',needtl:'មិនទាន់មានអត្ថបទខ្មែរ សូមបកប្រែជាមុន',ttsnet:'មិនអាចភ្ជាប់ទៅ TTS endpoint បានទេ',tts404:'រកមិនឃើញ TTS endpoint សូមដាក់ពង្រាយ api/tts.js ក្នុង Vercel',noseg:'សូមដំណើរការ ប្រតិចារិក ជាមុន'});
+Object.assign(T.en,{gen:'Generate voices',tlv:'Timeline',edit:'Editor',vc:'Voice',pv:'Preview',vd:'Default voice',spd:'Speed',pit:'Pitch',needtl:'No Khmer text yet: translate first',ttsnet:'Cannot reach the TTS endpoint',tts404:'TTS endpoint not found: deploy api/tts.js on Vercel',noseg:'Run Transcript first'});
+const sgn=n=>(n>=0?'+':'')+n,AC=()=>window._ac||(window._ac=new(window.AudioContext||window.webkitAudioContext)());
+const sk=x=>{let h=5381;for(const c of [x.k,x.v||cfg.vd,cfg.rt,cfg.pt].join('|'))h=(h*33^c.charCodeAt(0))>>>0;return h.toString(36)};
+const fit=x=>{if(x.d&&x.a!==sk(x)){x.d=0;x.over=false;x.f=1}if(!x.d)return;const sl=Math.max(.1,x.e-x.s);x.f=+Math.max(1,Math.min(1.25,x.d/sl)).toFixed(2);x.over=x.d/x.f>sl+.02};
+async function ttsBlob(text,v){const url=cfg.tts||'/api/tts';
+ for(let i=0;;i++){let r;try{r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voice:v||cfg.vd,rate:sgn(cfg.rt)+'%',pitch:sgn(cfg.pt)+'Hz'})})}catch(e){if(i>=3)throw new Error(t('ttsnet'));await wait(2**i*1000);continue}
+  if(r.ok)return r.blob();if((r.status>=500||r.status===429)&&i<3){await wait(2**i*1500);continue}
+  let m='';try{m=(await r.json()).error}catch(e){}throw new Error(r.status===404?t('tts404'):(m||'HTTP '+r.status))}}
+async function genOne(p,x){const key=sk(x),b=await ttsBlob(x.k,x.v);x.d=+(await AC().decodeAudioData(await b.arrayBuffer())).duration.toFixed(2);await db('blobs','readwrite',s=>s.put(b,p.id+':v:'+key));x.a=key;fit(x)}
+Pipeline.impl.gender=async p=>{if(!p.segs||!p.segs.length)throw new Error(t('noseg'));p.segs.forEach(x=>{if(!x.v)x.v=cfg.vd});saveP(p)};
+Pipeline.impl.speech=async(p,c)=>{const all=p.segs||[];if(!all.some(x=>x.k&&x.k.trim()))throw new Error(t('needtl'));
+ const L=all.filter(x=>x.k&&x.k.trim()&&x.a!==sk(x)),tot=L.length;let idx=0,n=0;if(!tot)return;
+ const w=async()=>{while(idx<tot){const x=L[idx++];await genOne(p,x);c.progress(Math.round(++n/tot*100),`${n}/${tot}`)}};
+ try{await Promise.all([w(),w()])}finally{saveP(p)}};
+let au=null;function play(b,r){if(au){au.pause();URL.revokeObjectURL(au.src)}au=new Audio(URL.createObjectURL(b));au.preservesPitch=true;au.playbackRate=r||1;au.play().catch(()=>{})}
+async function preview(x){if(!x||!x.k||!x.k.trim())return toast(t('needtl'),'e');try{const p=ed.p;let b=x.a===sk(x)?await db('blobs','readonly',s=>s.get(p.id+':v:'+x.a)):null;if(!b){await genOne(p,x);saveP(p);b=await db('blobs','readonly',s=>s.get(p.id+':v:'+x.a))}play(b,x.f)}catch(e){toast(e.message,'e')}}
+async function genVoices(){const r=await runStage(ed.p,'speech');ed.last=JSON.stringify(ed.p.segs);renderEd();if(r===true)toast('✓','o')}
+const peaks=new Map();let tl=null;
+async function getPeaks(p){if(peaks.has(p.id))return peaks.get(p.id);const out=[],N=p.chunks||0;
+ for(let i=0;i<N;i++){const b=await db('blobs','readonly',s=>s.get(p.id+':c'+i));if(!b)break;const a=await new OfflineAudioContext(1,1,16000).decodeAudioData(await b.arrayBuffer()),d=a.getChannelData(0),st=Math.floor(a.sampleRate*.05);
+  for(let j=0;j+st<=d.length;j+=st){let m=0;for(let k=j;k<j+st;k+=8)m=Math.max(m,Math.abs(d[k]));out.push(m)}
+  if(i<N-1){out.length=Math.min(out.length,(i+1)*12000);while(out.length<(i+1)*12000)out.push(0)}}
+ const f=Float32Array.from(out);peaks.set(p.id,f);return f}
+async function openTl(){const p=ed.p;view='tl';render();const el=$('#tl');el.innerHTML=`<div class="bar" style="margin-bottom:8px"><button class="btn" id="tle">${t('edit')}</button><button class="btn" data-z="-1" aria-label="Zoom out">−</button><button class="btn" data-z="1" aria-label="Zoom in">+</button></div><div class="glass" id="tlw" style="overflow-x:auto;height:230px"><div id="tls" style="height:0"></div><canvas id="tlc" style="position:sticky;left:0;display:block"></canvas></div>`;
+ let pk=new Float32Array(0);try{pk=await getPeaks(p)}catch(e){toast(e.message,'e')}
+ tl={p,pk,pps:20,dur:Math.max(pk.length*.05,...p.segs.map(x=>x.e))+5};$('#tls').style.width=tl.dur*tl.pps+'px';$('#tlw').onscroll=drawTl;drawTl()}
+function drawTl(){const w=$('#tlw'),c=$('#tlc');if(!w||!c||!tl)return;const W=w.clientWidth,H=230,pps=tl.pps,t0=w.scrollLeft/pps;c.width=W;c.height=H;const g=c.getContext('2d');g.fillStyle='#0a0816';g.fillRect(0,0,W,H);
+ g.fillStyle='#22d3ee99';for(let px=0;px<W;px++){const i0=Math.floor((t0+px/pps)/.05),i1=Math.max(i0+1,Math.floor((t0+(px+1)/pps)/.05));let m=0;for(let i=i0;i<i1&&i<tl.pk.length;i++)if(tl.pk[i]>m)m=tl.pk[i];const h=Math.min(1,m*2.5)*55;g.fillRect(px,75-h,1,Math.max(1,h*2))}
+ g.fillStyle='#9a96b8';g.font='11px sans-serif';const step=pps>=40?5:pps>=10?30:60;for(let s=Math.ceil(t0/step)*step;s<t0+W/pps;s+=step){const x=(s-t0)*pps;g.fillRect(x,0,1,8);g.fillText(tc(s).slice(0,8),x+3,18)}
+ g.fillText('Original',4,H-8);tl.hit=[];
+ for(const x of tl.p.segs){if(!x.d)continue;const sx=(x.s-t0)*pps,sw=(x.e-x.s)*pps,cw=x.d/(x.f||1)*pps;if(sx+Math.max(sw,cw)<0||sx>W)continue;
+  g.strokeStyle='#ffffff44';g.strokeRect(sx,150,sw,36);g.fillStyle=x.over?'#fb7185dd':'#8b5cf6dd';g.fillRect(sx,154,cw,28);tl.hit.push([sx,sx+cw,x])}}
+$('#tl').addEventListener('click',e=>{if(e.target.id==='tle'){view='edit';render();return renderEd()}
+ const z=e.target.closest('[data-z]');if(z&&tl){tl.pps=Math.max(2,Math.min(200,tl.pps*(+z.dataset.z>0?1.5:1/1.5)));const w=$('#tlw'),c=(w.scrollLeft+w.clientWidth/2)/(tl.pps/(+z.dataset.z>0?1.5:1/1.5));$('#tls').style.width=tl.dur*tl.pps+'px';w.scrollLeft=c*tl.pps-w.clientWidth/2;return drawTl()}
+ if(e.target.id==='tlc'&&tl){const r=e.target.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,h=y>150&&(tl.hit||[]).find(a=>x>=a[0]&&x<=a[1]);if(h)preview(h[2])}});
+/* ---------- Stage 4: mix, duck, mux, burn-in ---------- */
+Object.assign(T.km,{ex:'នាំចេញ',xmv:'វីដេអូដាក់សំឡេងខ្មែរ',xmb:'វីដេអូ + អក្សរខ្មែរបង្កប់ (យឺតខ្លាំង)',xmm:'សំឡេង mp3 ប៉ុណ្ណោះ',xd:'កម្រិតបន្ថយសំឡេងដើម',xf:'ពុម្ពអក្សរ',xs:'ទំហំអក្សរ (% នៃកម្ពស់)',xc:'ពណ៌អក្សរ',xp:'ទីតាំងអក្សរ',pb:'ក្រោម',pm:'កណ្តាល',ptp:'លើ',dlo:'ទាញយកលទ្ធផល',
+needsp:'សូមបង្កើតសំឡេងជាមុន (មានខ្សែខ្លះនៅមិនទាន់មាន ឬហួសសម័យ)',xbig:'ឯកសារធំពេកសម្រាប់អង្គចងចាំរបស់កម្មវិធីរុករក សូមបំបែកជាផ្នែកតូចៗ (ប្រហែលតិចជាង៖ ',xslow:'ការបង្កប់អក្សរត្រូវ encode វីដេអូឡើងវិញ ដែលយឺតខ្លាំងក្នុងកម្មវិធីរុករក សូមប្រើវីដេអូខ្លីជាង 20 នាទី ឬនាំចេញវីដេអូធម្មតា រួចប្រើឯកសារ .srt',xfail:'ការនាំចេញបរាជ័យ (ពិនិត្យថាវីដេអូមានសំឡេង និងកូដិក H.264/AAC)',nopersist:'រក្សាទុកឯកសារក្នុងកម្មវិធីរុករកមិនបាន ឯកសារនឹងបាត់ពេលផ្ទុកទំព័រឡើងវិញ'});
+Object.assign(T.en,{ex:'Export',xmv:'Dubbed video',xmb:'Video + burned-in Khmer subtitles (very slow)',xmm:'Audio only (mp3)',xd:'Original-audio ducking',xf:'Subtitle font',xs:'Font size (% of height)',xc:'Font color',xp:'Subtitle position',pb:'Bottom',pm:'Middle',ptp:'Top',dlo:'Download result',
+needsp:'Generate voices first (some lines are missing or outdated)',xbig:'File too large for browser memory: split it into parts (roughly under ',xslow:'Burning subtitles re-encodes the video, which is very slow in a browser. Use clips under 20 minutes, or export the normal dubbed video and use the .srt file',xfail:'Export failed (check the video has audio and uses H.264/AAC)',nopersist:'Could not store the file in browser storage; it will be lost on refresh'});
+let ffq=Promise.resolve();
+const withFF=fn=>{const r=ffq.then(async()=>{try{const f=await getFF();f.setProgress(()=>{});f.FS('readdir','/').filter(n=>/^(c\d+\.mp3|in|t\.\w+|w\d+\.wav|s\d+\.png|b\.png|out\.\w+|\w+\.txt)$/.test(n)).forEach(n=>{try{f.FS('unlink',n)}catch(e){}})}catch(e){}return fn()});ffq=r.catch(()=>{});return r};
+{const o=Pipeline.impl.separate;Pipeline.impl.separate=(p,c)=>withFF(()=>o(p,c))}
+const dlB=(b,n)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
+function wav(b){const d=b.getChannelData(0),n=d.length,v=new DataView(new ArrayBuffer(44+n*2)),w=(o,q)=>[...q].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+ w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,24000,true);v.setUint32(28,48000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+ for(let i=0;i<n;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,d[i]))*32767,true);return new Blob([v.buffer],{type:'audio/wav'})}
+/* Dub track is rendered in 10-minute windows and stored as WAV in IndexedDB, so RAM stays bounded. Clips >1x are time-stretched (pitch kept) with ffmpeg atempo. */
+async function mixWindows(p,dur,f,c){const W=600,nw=Math.max(1,Math.ceil(dur/W)),S=p.segs.filter(x=>x.d&&x.a===sk(x));
+ for(let w=0;w<nw;w++){const ws=w*W,len=Math.min(W,dur-ws),oc=new OfflineAudioContext(1,Math.max(24000,Math.ceil(len*24000)),24000);
+  for(const x of S){const cd=x.d/(x.f>1.01?x.f:1);if(x.s>=ws+W||x.s+cd<=ws)continue;
+   const b=await db('blobs','readonly',q=>q.get(p.id+':v:'+x.a));if(!b)throw new Error(t('needsp'));let ab;
+   if(x.f>1.01){f.FS('writeFile','t.mp3',new Uint8Array(await b.arrayBuffer()));await f.run('-i','t.mp3','-filter:a','atempo='+x.f,'-ar','24000','-ac','1','t.wav');const o=f.FS('readFile','t.wav');ab=await oc.decodeAudioData(o.buffer.slice(o.byteOffset,o.byteOffset+o.byteLength));f.FS('unlink','t.mp3');f.FS('unlink','t.wav')}
+   else ab=await oc.decodeAudioData(await b.arrayBuffer());
+   const sr=oc.createBufferSource();sr.buffer=ab;sr.connect(oc.destination);sr.start(Math.max(0,x.s-ws),Math.max(0,ws-x.s))}
+  const out=await oc.startRendering();if(await db('blobs','readwrite',q=>q.put(wav(out),p.id+':w'+w))===undefined)throw new Error(t('nopersist'));c.progress(Math.round((w+1)/nw*40),`${w+1}/${nw}`)}
+ return nw}
+const vdim=file=>new Promise(res=>{const v=document.createElement('video'),u=URL.createObjectURL(file);const d=()=>{URL.revokeObjectURL(u);res([(v.videoWidth||1280)&~1,(v.videoHeight||720)&~1])};v.preload='metadata';v.src=u;v.onloadedmetadata=d;v.onerror=d;setTimeout(d,8000)});
+async function burnFiles(p,f,w,h,c){const sz=Math.round(h*cfg.xs/100),lh=sz*1.45,H=Math.ceil(lh*3+sz*.4);try{await document.fonts.load(`700 ${sz}px "${cfg.xf}"`,'ក')}catch(e){}
+ const png=text=>new Promise(res=>{const cv=document.createElement('canvas');cv.width=w;cv.height=H;const g=cv.getContext('2d');
+  if(text){g.font=`700 ${sz}px "${cfg.xf}","Noto Sans Khmer",sans-serif`;g.textAlign='center';g.lineJoin='round';g.lineWidth=sz*.2;g.strokeStyle='#000';g.fillStyle=cfg.xc;
+   const sg=Intl.Segmenter?[...new Intl.Segmenter('km',{granularity:'word'}).segment(text)].map(q=>q.segment):text.split(/(?<= )/),L=[];let cur='';
+   for(const q of sg){if(cur&&g.measureText(cur+q).width>w*.9){L.push(cur.trim());cur=q}else cur+=q}L.push(cur.trim());const ls=L.slice(0,3);
+   ls.forEach((l,i)=>{const y=cfg.xp==='bottom'?H-sz*.3-(ls.length-1-i)*lh:sz+i*lh;g.strokeText(l,w/2,y);g.fillText(l,w/2,y)})}
+  cv.toBlob(async b=>res(new Uint8Array(await b.arrayBuffer())),'image/png')});
+ const S=p.segs.filter(x=>x.k&&x.k.trim()).sort((a,b)=>a.s-b.s);f.FS('writeFile','b.png',await png(''));let list='',t0=0,n=0;
+ for(let i=0;i<S.length;i++){const x=S[i],e=Math.min(x.e,i+1<S.length?S[i+1].s:x.e),s0=Math.max(x.s,t0);if(e-s0<.04)continue;
+  if(s0-t0>.02)list+=`file 'b.png'\nduration ${(s0-t0).toFixed(3)}\n`;
+  f.FS('writeFile',`s${n}.png`,await png(x.k));list+=`file 's${n}.png'\nduration ${(e-s0).toFixed(3)}\n`;t0=e;n++;if(n%25===0)c.progress(40+Math.round(i/S.length*10),`✎ ${i+1}/${S.length}`)}
+ f.FS('writeFile','sl.txt',list+"file 'b.png'\n");return{H,n}}
+Pipeline.impl.export=(p,c)=>withFF(async()=>{
+ const S=(p.segs||[]).filter(x=>x.k&&x.k.trim());if(!S.length)throw new Error(t('needtl'));if(S.some(x=>x.a!==sk(x)))throw new Error(t('needsp'));
+ const file=mem.get(p.id)||await db('blobs','readonly',q=>q.get(p.id));if(!file)throw new Error(t('nofile'));
+ const isA=!/^video|\.(mp4|mkv|mov)$/i.test(file.type||p.name),mode=isA?'mp3':cfg.xm,dur=p.duration||Math.max(...p.segs.map(x=>x.e)),mb=dur/60;
+ const need=file.size*1.15+mb*2.9e6+(mode==='burn'?file.size*.5:file.size*.1),est=mode==='mp3'?mb*.96e6:mode==='burn'?mb*5e6:file.size+mb*1.2e6;
+ if(need>1.5e9)throw new Error(t('xbig')+Math.max(5,Math.floor(mb*1.4e9/need))+' min)');if(mode==='burn'&&dur>1200)throw new Error(t('xslow'));
+ c.progress(0,'~'+Math.round(est/1e6)+' MB');const f=await getFF();
+ try{const nw=await mixWindows(p,dur,f,c);
+  f.setProgress(({ratio})=>c.progress(50+Math.max(0,Math.min(48,Math.round(ratio*48)))));
+  f.FS('writeFile','in',await FFmpeg.fetchFile(file));let wl='';
+  for(let i=0;i<nw;i++){f.FS('writeFile',`w${i}.wav`,new Uint8Array(await (await db('blobs','readonly',q=>q.get(p.id+':w'+i))).arrayBuffer()));wl+=`file 'w${i}.wav'\n`}f.FS('writeFile','wl.txt',wl);
+  const burn=mode==='burn',ai=burn?2:1,r=(1+cfg.xd/100*19).toFixed(1);let sub=null,dims=null;
+  if(burn){dims=await vdim(file);sub=await burnFiles(p,f,dims[0],dims[1],c)}
+  const G=cfg.xd>0?`[${ai}:a]asplit=2[sc][dv];[0:a][sc]sidechaincompress=threshold=0.02:ratio=${r}:attack=10:release=300[du];[du][dv]amix=inputs=2:duration=first,volume=2[a]`:`[0:a][${ai}:a]amix=inputs=2:duration=first,volume=2[a]`;
+  const cat=['-f','concat','-safe','0'],ext=mode==='mp3'?'mp3':'mp4';let args;
+  if(mode==='mp3')args=['-i','in',...cat,'-i','wl.txt','-filter_complex',G,'-map','[a]','-vn','-c:a','libmp3lame','-b:a','128k','out.mp3'];
+  else if(!burn)args=['-i','in',...cat,'-i','wl.txt','-filter_complex',G,'-map','0:v:0','-map','[a]','-c:v','copy','-c:a','aac','-b:a','160k','-movflags','+faststart','out.mp4'];
+  else{const m=Math.round(dims[1]*.04),y=cfg.xp==='top'?m:cfg.xp==='mid'?'(main_h-overlay_h)/2':`main_h-overlay_h-${m}`;
+   args=['-i','in',...cat,'-i','sl.txt',...cat,'-i','wl.txt','-filter_complex',`[1:v]fps=10,format=rgba[sb];[0:v][sb]overlay=0:${y}:eof_action=pass[v];${G}`,'-map','[v]','-map','[a]','-c:v','libx264','-preset','ultrafast','-crf','28','-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-movflags','+faststart','out.mp4']}
+  await f.run(...args);const o=f.FS('readFile','out.'+ext),blob=new Blob([o.buffer.slice(o.byteOffset,o.byteOffset+o.byteLength)],{type:mode==='mp3'?'audio/mpeg':'video/mp4'});
+  const name=p.name.replace(/\.[^.]+$/,'')+'.km.'+ext;mem.set(p.id+':out',blob);await db('blobs','readwrite',q=>q.put(blob,p.id+':out'));p.out={name,size:blob.size};saveP(p)}
+ catch(e){ff=null;throw new Error(/memory|abort|OOM|alloc/i.test(e.message)?t('oom'):/^(NEED|.*(Generate|Run|File|ffmpeg))/i.test(e.message)||e.message.length>3&&!/exit|Error\(/i.test(e.message)?e.message:t('xfail'))}
+ finally{try{(ff||f).FS('readdir','/').filter(n=>/^(in|t\.\w+|w\d+\.wav|s\d+\.png|b\.png|out\.\w+|\w+\.txt)$/.test(n)).forEach(n=>f.FS('unlink',n))}catch(e){}}});
+Object.assign(T.km,{ffhint:'ទំព័រពិនិត្យនេះរារាំងការទាញយក ffmpeg (ធម្មតា)។ សូមទាញយកឯកសារ ហើយដាក់ពង្រាយលើ Vercel របស់អ្នកផ្ទាល់'});Object.assign(T.en,{ffhint:'The hosted preview blocks downloading ffmpeg (expected). Deploy the file to your own Vercel and run it there'});
+/* ---------- Boot ---------- */
+(async()=>{const all=await db('projects','readonly',s=>s.getAll());projects=all||[];projects.sort((a,b)=>a.added-b.added);
+ projects.forEach(p=>STAGES.forEach(s=>{if(p.stages[s].s==='running')p.stages[s]={s:'idle',p:0}}));
+ render();if(all===undefined)toast('IndexedDB unavailable: files will not persist after refresh.','e')})();
+</script>
+</body>
+</html>
