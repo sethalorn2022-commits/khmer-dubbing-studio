@@ -142,8 +142,8 @@ async function regenThumbs(){for(const p of projects){const f=mem.get(p.id);if(f
 /* ---------- Render ---------- */
 const fmtD=s=>{s=Math.round(s||0);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,z=n=>String(n).padStart(2,'0');return(h?h+':':'')+z(m)+':'+z(x)};
 const fmtS=b=>b>1e9?(b/1e9).toFixed(2)+' GB':(b/1e6).toFixed(1)+' MB';
-const SET0={src:'auto',tone:'dialogue',gm:'gemini-2.5-flash',dlim:250,gloss:'',vm:'km-KH-PisethNeural',vf:'km-KH-SreymomNeural',vd:'km-KH-SreymomNeural',rt:0,pt:0,tts:'/api/tts',xm:'video',xd:60,xf:'Noto Sans Khmer',xs:5,xc:'#ffffff',xp:'bottom'};
-let cfg={...SET0,...ls.get('kds_set',{})};
+const SET0={src:'auto',tone:'dialogue',gm:'gemini-3.8-flash',dlim:250,gloss:'',vm:'km-KH-PisethNeural',vf:'km-KH-SreymomNeural',vd:'km-KH-SreymomNeural',rt:0,pt:0,tts:'/api/tts',xm:'video',xd:60,xf:'Noto Sans Khmer',xs:5,xc:'#ffffff',xp:'bottom'};
+let cfg={...SET0,...ls.get('kds_set',{})};if(!/^gemini-3\./.test(cfg.gm))cfg.gm=SET0.gm;
 function render(){
  $('#ttl').textContent=t('app');$('#bImp').textContent=t('imp');$('#bSet').textContent=view==='main'?t('set'):t('back');$('#bThm').textContent=t('thm');$('#bAll').textContent=t('all');document.documentElement.lang=lang;document.title=t('app');
  $('#bThm').hidden=$('#bAll').hidden=$('#bImp').hidden=view!=='main';$('#main').hidden=view!=='main';$('#set').hidden=view!=='set';$('#ed').hidden=view!=='edit';$('#tl').hidden=view!=='tl';
@@ -159,7 +159,7 @@ function renderSet(){const k=ls.get('kds_keys',{}),o=(id,a)=>`<select data-c="${
  <div class="glass sec"><h2>${t('defs')}</h2><div class="grid" style="padding:0">
  <div><label>${t('src')}</label>${o('src',[['auto',t('auto')],['en','English'],['zh','中文'],['ko','한국어'],['ja','日本語'],['th','ไทย'],['vi','Tiếng Việt'],['hi','हिन्दी'],['fr','Français'],['es','Español']])}</div>
  <div><label>${t('tone')}</label>${o('tone',[['dialogue',t('td')],['narration',t('tn')],['recap',t('tr2')]])}</div>
- <div><label>Gemini model</label>${o('gm',[['gemini-2.5-flash','gemini-2.5-flash'],['gemini-2.5-flash-lite','gemini-2.5-flash-lite']])}</div>
+ <div><label>Gemini model</label>${o('gm',[['gemini-3.8-flash','gemini-3.8-flash'],['gemini-3.5-flash-lite','gemini-3.5-flash-lite']])}</div>
  <div><label for="dl">${t('dlim')}</label><input id="dl" data-c="dlim" type="number" min="1" value="${cfg.dlim}" style="width:100%;background:#0006;border:1px solid var(--line);border-radius:10px;padding:8px 10px"></div>
  <div><label>${t('vd')}</label>${o('vd',[['km-KH-SreymomNeural','Sreymom ♀'],['km-KH-PisethNeural','Piseth ♂']])}</div>
  <div><label for="rt">${t('spd')}: ${cfg.rt}%</label><input id="rt" data-c="rt" type="range" min="-30" max="30" value="${cfg.rt}" style="width:100%"></div>
