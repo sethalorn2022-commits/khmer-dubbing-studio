@@ -143,8 +143,9 @@ async function regenThumbs(){for(const p of projects){const f=mem.get(p.id);if(f
 const fmtD=s=>{s=Math.round(s||0);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,z=n=>String(n).padStart(2,'0');return(h?h+':':'')+z(m)+':'+z(x)};
 const fmtS=b=>b>1e9?(b/1e9).toFixed(2)+' GB':(b/1e6).toFixed(1)+' MB';
 const GEMINI_MODELS=['gemini-3.5-flash-lite','gemini-3.5-flash','gemini-3.6-flash','gemini-3.7-flash','gemini-3.8-flash'];
-const SET0={src:'auto',tone:'dialogue',gm:'gemini-3.5-flash-lite',dlim:250,gloss:'',vm:'km-KH-PisethNeural',vf:'km-KH-SreymomNeural',vd:'km-KH-SreymomNeural',rt:0,pt:0,tts:'/api/tts',xm:'video',xd:60,xf:'Noto Sans Khmer',xs:5,xc:'#ffffff',xp:'bottom'};
-let cfg={...SET0,...ls.get('kds_set',{})};if(!GEMINI_MODELS.includes(cfg.gm))cfg.gm=SET0.gm;
+const SET0={src:'auto',tone:'dialogue',gm:'gemini-3.5-flash-lite',dlim:250,gloss:'',vm:'km-KH-PisethNeural',vf:'km-KH-SreymomNeural',vd:'km-KH-SreymomNeural',rt:0,pt:0,tts:'/api/tts',xm:'clean',xd:60,xf:'Noto Sans Khmer',xs:5,xc:'#ffffff',xp:'bottom'};
+const savedSet=ls.get('kds_set',{});
+let cfg={...SET0,...savedSet};if(!savedSet.xmUserSet&&savedSet.xm==='video')cfg.xm='clean';if(!GEMINI_MODELS.includes(cfg.gm))cfg.gm=SET0.gm;
 function render(){
  $('#ttl').textContent=t('app');$('#bImp').textContent=t('imp');$('#bSet').textContent=view==='main'?t('set'):t('back');$('#bThm').textContent=t('thm');$('#bAll').textContent=t('all');document.documentElement.lang=lang;document.title=t('app');
  $('#bThm').hidden=$('#bAll').hidden=$('#bImp').hidden=view!=='main';$('#main').hidden=view!=='main';$('#set').hidden=view!=='set';$('#ed').hidden=view!=='edit';$('#tl').hidden=view!=='tl';
@@ -168,7 +169,7 @@ function renderSet(){const k=ls.get('kds_keys',{}),o=(id,a)=>`<select data-c="${
  <div><label for="tu">TTS endpoint</label><input id="tu" data-c="tts" value="${esc(cfg.tts)}" style="width:100%;background:#0006;border:1px solid var(--line);border-radius:10px;padding:8px 10px"></div></div>
  <label for="gl" style="margin-top:12px">${t('gloss')}</label><textarea id="gl" data-c="gloss" rows="4">${esc(cfg.gloss)}</textarea></div>
  <div class="glass sec"><h2>${t('ex')}</h2><div class="grid" style="padding:0">
- <div><label>${t('ex')}</label>${o('xm',[['video',t('xmv')],['burn',t('xmb')],['mp3',t('xmm')]])}</div>
+ <div><label>${t('ex')}</label>${o('xm',[['clean',t('xvc')],['video',t('xmv')],['burnclean',t('xbc')],['burn',t('xmb')],['mp3',t('xmm')]])}</div>
  <div><label for="xd">${t('xd')}: ${cfg.xd}%</label><input id="xd" data-c="xd" type="range" min="0" max="100" value="${cfg.xd}" style="width:100%"></div>
  <div><label>${t('xf')}</label>${o('xf',[['Noto Sans Khmer','Noto Sans Khmer'],['Battambang','Battambang']])}</div>
  <div><label for="xs">${t('xs')}: ${cfg.xs}</label><input id="xs" data-c="xs" type="range" min="3" max="9" step="0.5" value="${cfg.xs}" style="width:100%"></div>
@@ -196,7 +197,7 @@ $('#main').addEventListener('click',async e=>{if(e.target.closest('#dz'))return 
   if(w==='rm'&&confirm(t('del'))){projects=projects.filter(x=>x!==p);mem.delete(p.id);db('projects','readwrite',s=>s.delete(p.id));db('blobs','readwrite',s=>s.delete(IDBKeyRange.bound(p.id,p.id+':\uffff')));render()}}});
 $('#main').addEventListener('keydown',e=>{if(e.target.id==='dz'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();$('#file').click()}});
 $('#set').addEventListener('input',e=>{const k=e.target.dataset.k;if(k){const o=ls.get('kds_keys',{});o[k]=e.target.value.trim();ls.set('kds_keys',o)}});
-$('#set').addEventListener('change',e=>{const c=e.target.dataset.c;if(c){cfg[c]=/^(dlim|rt|pt|xd|xs)$/.test(c)?(+e.target.value||(c==='dlim'?250:0)):e.target.value;ls.set('kds_set',cfg);renderSet();toast(t('save'),'o')}});
+$('#set').addEventListener('change',e=>{const c=e.target.dataset.c;if(c){cfg[c]=/^(dlim|rt|pt|xd|xs)$/.test(c)?(+e.target.value||(c==='dlim'?250:0)):e.target.value;if(c==='xm')cfg.xmUserSet=true;ls.set('kds_set',cfg);renderSet();toast(t('save'),'o')}});
 $('#set').addEventListener('click',e=>{const s=e.target.closest('[data-sh]'),x=e.target.closest('[data-ts]');
  if(s){const i=$('#k-'+s.dataset.sh),h=i.type==='password';i.type=h?'text':'password';s.textContent=h?t('hide'):t('show')}
  if(x)testKey(x.dataset.ts)});
@@ -318,9 +319,9 @@ $('#tl').addEventListener('click',e=>{if(e.target.id==='tle'){view='edit';render
  const z=e.target.closest('[data-z]');if(z&&tl){tl.pps=Math.max(2,Math.min(200,tl.pps*(+z.dataset.z>0?1.5:1/1.5)));const w=$('#tlw'),c=(w.scrollLeft+w.clientWidth/2)/(tl.pps/(+z.dataset.z>0?1.5:1/1.5));$('#tls').style.width=tl.dur*tl.pps+'px';w.scrollLeft=c*tl.pps-w.clientWidth/2;return drawTl()}
  if(e.target.id==='tlc'&&tl){const r=e.target.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,h=y>150&&(tl.hit||[]).find(a=>x>=a[0]&&x<=a[1]);if(h)preview(h[2])}});
 /* ---------- Stage 4: mix, duck, mux, burn-in ---------- */
-Object.assign(T.km,{ex:'នាំចេញ',xmv:'វីដេអូដាក់សំឡេងខ្មែរ',xmb:'វីដេអូ + អក្សរខ្មែរបង្កប់ (យឺតខ្លាំង)',xmm:'សំឡេង mp3 ប៉ុណ្ណោះ',xd:'កម្រិតបន្ថយសំឡេងដើម',xf:'ពុម្ពអក្សរ',xs:'ទំហំអក្សរ (% នៃកម្ពស់)',xc:'ពណ៌អក្សរ',xp:'ទីតាំងអក្សរ',pb:'ក្រោម',pm:'កណ្តាល',ptp:'លើ',dlo:'ទាញយកលទ្ធផល',
+Object.assign(T.km,{ex:'នាំចេញ',xvc:'វីដេអូដាក់សំឡេងខ្មែរ (បិទសំឡេងដើម)',xmv:'វីដេអូដាក់សំឡេងខ្មែរ + បន្ថយសំឡេងដើម',xbc:'វីដេអូ + អក្សរខ្មែរ (បិទសំឡេងដើម)',xmb:'វីដេអូ + អក្សរខ្មែរបង្កប់ + បន្ថយសំឡេងដើម (យឺតខ្លាំង)',xmm:'សំឡេងខ្មែរ mp3 ប៉ុណ្ណោះ',xd:'កម្រិតបន្ថយសំឡេងដើម',xf:'ពុម្ពអក្សរ',xs:'ទំហំអក្សរ (% នៃកម្ពស់)',xc:'ពណ៌អក្សរ',xp:'ទីតាំងអក្សរ',pb:'ក្រោម',pm:'កណ្តាល',ptp:'លើ',dlo:'ទាញយកលទ្ធផល',
 needsp:'សូមបង្កើតសំឡេងជាមុន (មានខ្សែខ្លះនៅមិនទាន់មាន ឬហួសសម័យ)',xbig:'ឯកសារធំពេកសម្រាប់អង្គចងចាំរបស់កម្មវិធីរុករក សូមបំបែកជាផ្នែកតូចៗ (ប្រហែលតិចជាង៖ ',xslow:'ការបង្កប់អក្សរត្រូវ encode វីដេអូឡើងវិញ ដែលយឺតខ្លាំងក្នុងកម្មវិធីរុករក សូមប្រើវីដេអូខ្លីជាង 20 នាទី ឬនាំចេញវីដេអូធម្មតា រួចប្រើឯកសារ .srt',xfail:'ការនាំចេញបរាជ័យ (ពិនិត្យថាវីដេអូមានសំឡេង និងកូដិក H.264/AAC)',nopersist:'រក្សាទុកឯកសារក្នុងកម្មវិធីរុករកមិនបាន ឯកសារនឹងបាត់ពេលផ្ទុកទំព័រឡើងវិញ'});
-Object.assign(T.en,{ex:'Export',xmv:'Dubbed video',xmb:'Video + burned-in Khmer subtitles (very slow)',xmm:'Audio only (mp3)',xd:'Original-audio ducking',xf:'Subtitle font',xs:'Font size (% of height)',xc:'Font color',xp:'Subtitle position',pb:'Bottom',pm:'Middle',ptp:'Top',dlo:'Download result',
+Object.assign(T.en,{ex:'Export',xvc:'Dubbed video (mute original)',xmv:'Dubbed video + lowered original',xbc:'Video + Khmer subtitles (mute original)',xmb:'Video + burned-in Khmer subtitles + lowered original (very slow)',xmm:'Khmer dub audio only (mp3)',xd:'Original-audio ducking',xf:'Subtitle font',xs:'Font size (% of height)',xc:'Font color',xp:'Subtitle position',pb:'Bottom',pm:'Middle',ptp:'Top',dlo:'Download result',
 needsp:'Generate voices first (some lines are missing or outdated)',xbig:'File too large for browser memory: split it into parts (roughly under ',xslow:'Burning subtitles re-encodes the video, which is very slow in a browser. Use clips under 20 minutes, or export the normal dubbed video and use the .srt file',xfail:'Export failed (check the video has audio and uses H.264/AAC)',nopersist:'Could not store the file in browser storage; it will be lost on refresh'});
 let ffq=Promise.resolve();
 const withFF=fn=>{const r=ffq.then(async()=>{try{const f=await getFF();f.setProgress(()=>{});f.FS('readdir','/').filter(n=>/^(c\d+\.mp3|in|t\.\w+|w\d+\.wav|s\d+\.png|b\.png|out\.\w+|\w+\.txt)$/.test(n)).forEach(n=>{try{f.FS('unlink',n)}catch(e){}})}catch(e){}return fn()});ffq=r.catch(()=>{});return r};
@@ -363,9 +364,9 @@ Pipeline.impl.export=(p,c)=>withFF(async()=>{
   f.setProgress(({ratio})=>c.progress(50+Math.max(0,Math.min(48,Math.round(ratio*48)))));
   f.FS('writeFile','in',await FFmpeg.fetchFile(file));let wl='';
   for(let i=0;i<nw;i++){f.FS('writeFile',`w${i}.wav`,new Uint8Array(await (await db('blobs','readonly',q=>q.get(p.id+':w'+i))).arrayBuffer()));wl+=`file 'w${i}.wav'\n`}f.FS('writeFile','wl.txt',wl);
-  const burn=mode==='burn',ai=burn?2:1,r=(1+cfg.xd/100*19).toFixed(1);let sub=null,dims=null;
+  const burn=mode==='burn'||mode==='burnclean',clean=mode==='clean'||mode==='burnclean'||mode==='mp3',ai=burn?2:1,r=(1+cfg.xd/100*19).toFixed(1);let sub=null,dims=null;
   if(burn){dims=await vdim(file);sub=await burnFiles(p,f,dims[0],dims[1],c)}
-  const G=cfg.xd>0?`[${ai}:a]asplit=2[sc][dv];[0:a][sc]sidechaincompress=threshold=0.02:ratio=${r}:attack=10:release=300[du];[du][dv]amix=inputs=2:duration=first,volume=2[a]`:`[0:a][${ai}:a]amix=inputs=2:duration=first,volume=2[a]`;
+  const G=clean?`[${ai}:a]volume=1[a]`:cfg.xd>0?`[${ai}:a]asplit=2[sc][dv];[0:a][sc]sidechaincompress=threshold=0.02:ratio=${r}:attack=10:release=300[du];[du][dv]amix=inputs=2:duration=first,volume=2[a]`:`[0:a][${ai}:a]amix=inputs=2:duration=first,volume=2[a]`;
   const cat=['-f','concat','-safe','0'],ext=mode==='mp3'?'mp3':'mp4';let args;
   if(mode==='mp3')args=['-i','in',...cat,'-i','wl.txt','-filter_complex',G,'-map','[a]','-vn','-c:a','libmp3lame','-b:a','128k','out.mp3'];
   else if(!burn)args=['-i','in',...cat,'-i','wl.txt','-filter_complex',G,'-map','0:v:0','-map','[a]','-c:v','copy','-c:a','aac','-b:a','160k','-movflags','+faststart','out.mp4'];
