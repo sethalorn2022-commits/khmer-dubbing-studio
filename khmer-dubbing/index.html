@@ -142,8 +142,9 @@ async function regenThumbs(){for(const p of projects){const f=mem.get(p.id);if(f
 /* ---------- Render ---------- */
 const fmtD=s=>{s=Math.round(s||0);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,z=n=>String(n).padStart(2,'0');return(h?h+':':'')+z(m)+':'+z(x)};
 const fmtS=b=>b>1e9?(b/1e9).toFixed(2)+' GB':(b/1e6).toFixed(1)+' MB';
-const SET0={src:'auto',tone:'dialogue',gm:'gemini-3.8-flash',dlim:250,gloss:'',vm:'km-KH-PisethNeural',vf:'km-KH-SreymomNeural',vd:'km-KH-SreymomNeural',rt:0,pt:0,tts:'/api/tts',xm:'video',xd:60,xf:'Noto Sans Khmer',xs:5,xc:'#ffffff',xp:'bottom'};
-let cfg={...SET0,...ls.get('kds_set',{})};if(!/^gemini-3\./.test(cfg.gm))cfg.gm=SET0.gm;
+const GEMINI_MODELS=['gemini-3.5-flash-lite','gemini-3.5-flash','gemini-3.6-flash','gemini-3.7-flash','gemini-3.8-flash'];
+const SET0={src:'auto',tone:'dialogue',gm:'gemini-3.5-flash-lite',dlim:250,gloss:'',vm:'km-KH-PisethNeural',vf:'km-KH-SreymomNeural',vd:'km-KH-SreymomNeural',rt:0,pt:0,tts:'/api/tts',xm:'video',xd:60,xf:'Noto Sans Khmer',xs:5,xc:'#ffffff',xp:'bottom'};
+let cfg={...SET0,...ls.get('kds_set',{})};if(!GEMINI_MODELS.includes(cfg.gm))cfg.gm=SET0.gm;
 function render(){
  $('#ttl').textContent=t('app');$('#bImp').textContent=t('imp');$('#bSet').textContent=view==='main'?t('set'):t('back');$('#bThm').textContent=t('thm');$('#bAll').textContent=t('all');document.documentElement.lang=lang;document.title=t('app');
  $('#bThm').hidden=$('#bAll').hidden=$('#bImp').hidden=view!=='main';$('#main').hidden=view!=='main';$('#set').hidden=view!=='set';$('#ed').hidden=view!=='edit';$('#tl').hidden=view!=='tl';
@@ -159,7 +160,7 @@ function renderSet(){const k=ls.get('kds_keys',{}),o=(id,a)=>`<select data-c="${
  <div class="glass sec"><h2>${t('defs')}</h2><div class="grid" style="padding:0">
  <div><label>${t('src')}</label>${o('src',[['auto',t('auto')],['en','English'],['zh','中文'],['ko','한국어'],['ja','日本語'],['th','ไทย'],['vi','Tiếng Việt'],['hi','हिन्दी'],['fr','Français'],['es','Español']])}</div>
  <div><label>${t('tone')}</label>${o('tone',[['dialogue',t('td')],['narration',t('tn')],['recap',t('tr2')]])}</div>
- <div><label>Gemini model</label>${o('gm',[['gemini-3.8-flash','gemini-3.8-flash'],['gemini-3.5-flash-lite','gemini-3.5-flash-lite']])}</div>
+ <div><label>Gemini model</label>${o('gm',GEMINI_MODELS.map(m=>[m,m]))}</div>
  <div><label for="dl">${t('dlim')}</label><input id="dl" data-c="dlim" type="number" min="1" value="${cfg.dlim}" style="width:100%;background:#0006;border:1px solid var(--line);border-radius:10px;padding:8px 10px"></div>
  <div><label>${t('vd')}</label>${o('vd',[['km-KH-SreymomNeural','Sreymom ♀'],['km-KH-PisethNeural','Piseth ♂']])}</div>
  <div><label for="rt">${t('spd')}: ${cfg.rt}%</label><input id="rt" data-c="rt" type="range" min="-30" max="30" value="${cfg.rt}" style="width:100%"></div>
@@ -215,7 +216,7 @@ async function api(url,opt,{tag,note,tries=5}={}){
    const ra=+r.headers.get('retry-after')||Math.min(2**i*5,60);if(i>=tries||ra>120)throw new Error(t('rate')+' ('+Math.round(ra)+'s)');
    for(let n=Math.ceil(ra);n>0;n--){if(note)note('⏳'+n+'s');await wait(1000)}continue}
   if(r.status>=500&&i<tries){await wait(2**i*1500);continue}
-  throw new Error(msg||'HTTP '+r.status)}}
+  const err=new Error(msg||'HTTP '+r.status);err.status=r.status;err.body=txt;throw err}}
 async function getFF(){if(ff)return ff;if(!window.FFmpeg)throw new Error(t('ffmissing')+' — '+t('ffhint'));const x=FFmpeg.createFFmpeg({log:false,corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'});try{await x.load()}catch(e){console.error('[KDS] ffmpeg load failed',e);throw new Error(t('ffmissing')+': '+((e&&e.message)||e)+' — '+(typeof SharedArrayBuffer==='undefined'?t('sabhint'):t('ffhint')))}return ff=x}
 Pipeline.impl.separate=async(p,c)=>{
  const file=mem.get(p.id)||await db('blobs','readonly',s=>s.get(p.id));if(!file)throw new Error(t('nofile'));
@@ -247,8 +248,10 @@ Pipeline.impl.translate=async(p,c)=>{
   const prompt=`Translate these subtitle lines${p.srcLang?' (source language: '+p.srcLang+')':''} into natural spoken Khmer. ${TONES[cfg.tone]} Keep each line short enough to be spoken in its original time slot, keep character names consistent, never translate literally. Glossary (keep these terms exactly as written, or use the given Khmer):\n${cfg.gloss.trim()||'(none)'}\nPrevious lines for context:\n${ctx||'(none)'}\nReturn ONLY a JSON array of ${batch.length} strings, same order and count.\nLines:\n${JSON.stringify(batch.map(x=>x.o))}`;
   let out=null;
   for(let a=0;a<3&&!out;a++){if(gemUsed()>=cfg.dlim)throw new Error(t('daily'));
-   const j=await api(`https://generativelanguage.googleapis.com/v1beta/models/${cfg.gm}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseMimeType:'application/json',temperature:.3}})},{tag:'gem',note:m=>c.progress(Math.round(i/n*100),`${i+1}/${n} ${m}`)});
-   gemInc();try{out=JSON.parse(j.candidates[0].content.parts[0].text)}catch(e){out=null}if(!Array.isArray(out)||out.length!==batch.length)out=null}
+   const models=[cfg.gm,...GEMINI_MODELS.filter(m=>m!==cfg.gm)],base=Math.round(i/n*100);let lastErr=null;
+   for(const gm of models){try{const j=await api(`https://generativelanguage.googleapis.com/v1beta/models/${gm}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseMimeType:'application/json',temperature:.3}})},{tag:'gem',tries:3,note:m=>c.progress(base,`${i+1}/${n} ${gm} ${m}`)});
+    gemInc();try{out=JSON.parse(j.candidates[0].content.parts[0].text)}catch(e){out=null}if(Array.isArray(out)&&out.length===batch.length){if(gm!==cfg.gm)c.progress(base,`${i+1}/${n} ${gm}`);break}out=null;lastErr=new Error(t('badjson'))}catch(e){lastErr=e;if(!(e.status===429||e.status>=500||/high demand|overloaded|unavailable|temporar/i.test(e.message)))throw e;c.progress(base,`${i+1}/${n} ${gm} busy`);await wait(1200)}}
+   if(out)break;if(lastErr&&a>=2)throw lastErr}
   if(!out)throw new Error(t('badjson'));
   batch.forEach((x,j)=>x.k=String(out[j]));saveP(p);c.progress(Math.round((i+1)/n*100),`${i+1}/${n}`)}};
 /* ---------- Subtitle editor ---------- */
@@ -381,3 +384,4 @@ Object.assign(T.km,{sabhint:'សូមបន្ថែមឯកសារ vercel.j
 </script>
 </body>
 </html>
+
