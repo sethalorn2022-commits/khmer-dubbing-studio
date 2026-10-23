@@ -104,14 +104,14 @@ nosegs:'មិនទាន់មានប្រតិចារិក សូម�
 daily:'ដល់ដែនកំណត់ប្រចាំថ្ងៃនៃកូតាឥតគិតថ្លៃហើយ សូមព្យាយាមម្តងទៀតនៅពេលកូតាកំណត់ឡើងវិញ (ជាធម្មតាថ្ងៃស្អែក)',rate:'ជាប់ដែនកំណត់អត្រា',net2:'បណ្តាញមានបញ្ហា បានព្យាយាមច្រើនដងហើយ',big25:'ផ្នែកសំឡេងធំពេក',
 ffmissing:'ផ្ទុក ffmpeg មិនបាន (ពិនិត្យអ៊ីនធឺណិត)',nofile:'រកមិនឃើញឯកសារ សូមនាំចូលម្តងទៀត',oom:'អង្គចងចាំមិនគ្រប់គ្រាន់ សូមបំបែកឯកសារជាផ្នែកតូចៗ',loadff:'កំពុងផ្ទុក ffmpeg',noaudio:'ឯកសារគ្មានសំឡេង',
 nogroq:'សូមបញ្ចូលសោ Groq ក្នុងការកំណត់',nogem:'សូមបញ្ចូលសោ Gemini ក្នុងការកំណត់',needsep:'សូមដំណើរការ បំបែកសំឡេង ជាមុន',needtr:'សូមដំណើរការ ប្រតិចារិក ជាមុន',badjson:'Gemini ឆ្លើយមិនត្រឹមត្រូវ សូមព្យាយាមម្តងទៀត',
-quota:'កូតាឥតគិតថ្លៃ',dl:'ទាញយក',dlim:'ដែនកំណត់ Gemini ក្នុងមួយថ្ងៃ (កែបាន)',qnote:'ដែនកំណត់ពិតអាស្រ័យលើគណនី Google/Groq របស់អ្នក ហើយអាចប្រែប្រួល។ ការប្រើ Gemini ត្រូវបានរាប់ក្នុងកម្មវិធីនេះប៉ុណ្ណោះ។',voice:'សំឡេង (Edge TTS, Stage 3)',left:'ការស្នើនៅសល់'});
+quota:'កូតាឥតគិតថ្លៃ',dl:'ទាញយក',dlim:'ដែនកំណត់ Gemini ក្នុងមួយថ្ងៃ (កែបាន)',qnote:'ដែនកំណត់ពិតអាស្រ័យលើគណនី Google/Groq របស់អ្នក ហើយអាចប្រែប្រួល។ ការប្រើ Gemini ត្រូវបានរាប់ក្នុងកម្មវិធីនេះប៉ុណ្ណោះ។',voice:'សំឡេង (Gemini TTS, Stage 3)',left:'ការស្នើនៅសល់'});
 Object.assign(T.en,{ni:'This stage is built in Stage 3 (voice & export)',undo:'Undo',redo:'Redo',find:'Find',repl:'Replace with',rall:'Replace all',st:'Start',endt:'End',orig:'Original',
 gloss:'Glossary (one per line, e.g. John=ចន, or John to keep as is)',tone:'Translation tone',src:'Source language',auto:'Auto-detect',td:'Movie dialogue',tn:'Narration',tr2:'Movie recap',
 nosegs:'No transcript yet: run Transcript first',badtime:'Invalid time (format 00:00:00,000)',badkey:'API key invalid: check Settings',
 daily:'Daily free limit reached. Try again when the quota resets (usually tomorrow).',rate:'Rate limited',net2:'Network problem after several retries',big25:'Audio chunk too large',
 ffmissing:'Could not load ffmpeg (check your connection)',nofile:'File not found: import it again',oom:'Not enough memory: split the file into smaller parts',loadff:'Loading ffmpeg',noaudio:'File has no audio',
 nogroq:'Add your Groq key in Settings',nogem:'Add your Gemini key in Settings',needsep:'Run Separate first',needtr:'Run Transcript first',badjson:'Gemini returned an invalid answer: retry',
-quota:'Free quota',dl:'Download',dlim:'Gemini daily limit (editable)',qnote:'Real limits depend on your Google/Groq account and can change. Gemini usage is counted by this app only.',voice:'Voice (Edge TTS, Stage 3)',left:'requests left'});
+quota:'Free quota',dl:'Download',dlim:'Gemini daily limit (editable)',qnote:'Real limits depend on your Google/Groq account and can change. Gemini usage is counted by this app only.',voice:'Voice (Gemini TTS, Stage 3)',left:'requests left'});
 const ls={get:(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let lang=ls.get('kds_lang','km'),view='main',projects=[],mem=new Map(),dbp=null;
 const t=k=>T[lang][k]||k,$=s=>document.querySelector(s);
@@ -289,7 +289,14 @@ Object.assign(T.en,{gen:'Generate voices',tlv:'Timeline',edit:'Editor',vc:'Voice
 const sgn=n=>(n>=0?'+':'')+n,AC=()=>window._ac||(window._ac=new(window.AudioContext||window.webkitAudioContext)());
 const sk=x=>{let h=5381;for(const c of [x.k,x.v||cfg.vd,cfg.rt,cfg.pt].join('|'))h=(h*33^c.charCodeAt(0))>>>0;return h.toString(36)};
 const fit=x=>{if(x.d&&x.a!==sk(x)){x.d=0;x.over=false;x.f=1}if(!x.d)return;const sl=Math.max(.1,x.e-x.s);x.f=+Math.max(1,Math.min(1.25,x.d/sl)).toFixed(2);x.over=x.d/x.f>sl+.02};
-async function ttsBlob(text,v){const url=cfg.tts||'/api/tts';
+async function geminiTtsBlob(text,v){const k=keys().gemini;if(!k)throw new Error(t('nogem'));if(gemUsed()>=cfg.dlim)throw new Error(t('daily'));
+ const male=/piseth|male/i.test(v||cfg.vd),voice=male?'Puck':'Kore',style=['Speak naturally in Khmer and read the supplied text exactly as written.'];
+ if(cfg.rt>=8)style.push('speak faster');else if(cfg.rt<=-8)style.push('speak slower');
+ if(cfg.pt>=5)style.push('use a higher pitch');else if(cfg.pt<=-5)style.push('use a lower pitch');
+ const j=await api('https://generativelanguage.googleapis.com/v1beta/interactions',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},body:JSON.stringify({model:'gemini-3.8-flash-lite-tts',input:[{type:'user_input',content:[{type:'text',text,annotations:[{type:'speech_metadata',style:style.join(', ')}]}]}],response_format:{type:'audio'},generation_config:{speech_config:[{voice}]}})},{tag:'gem',tries:4});
+ const blocks=(j.steps||[]).filter(s=>s.type==='model_output').flatMap(s=>s.content||[]),audio=blocks.filter(x=>x.type==='audio').slice(-1)[0];if(!audio||!audio.data)throw new Error('Gemini TTS returned no audio');
+ const raw=atob(audio.data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);gemInc();return new Blob([bytes],{type:'audio/wav'})}
+async function ttsBlob(text,v){const url=cfg.tts||'/api/tts';if(url==='/api/tts'||url==='gemini')return geminiTtsBlob(text,v);
  for(let i=0;;i++){let r;try{r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voice:v||cfg.vd,rate:sgn(cfg.rt)+'%',pitch:sgn(cfg.pt)+'Hz'})})}catch(e){if(i>=3)throw new Error(t('ttsnet'));await wait(2**i*1000);continue}
   if(r.ok)return r.blob();if((r.status>=500||r.status===429)&&i<3){await wait(2**i*1500);continue}
   let m='';try{m=(await r.json()).error}catch(e){}throw new Error(r.status===404?t('tts404'):(m||'HTTP '+r.status))}}
